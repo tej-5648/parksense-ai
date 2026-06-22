@@ -7,12 +7,12 @@
 
 ---
 
-## 🌟 Executive Summary
+##  Executive Summary
 Bengaluru's rapid growth has led to severe traffic bottlenecks, often exacerbated by illegal parking on main arterial roads and critical junctions. Manual enforcement cannot scale to cover every street simultaneously. **ParkSense AI** solves this by using advanced Machine Learning (ML) to identify hidden patterns in historical traffic violation data, telling the Bengaluru Traffic Police (BTP) exactly *where* and *when* violations are most likely to occur.
 
 ---
 
-## 🧠 Machine Learning Engine
+##  Machine Learning Engine
 
 The core of ParkSense AI is built around advanced spatial clustering and temporal forecasting. We do not rely on arbitrary grid systems or basic heatmaps; we use precise density-based mathematical models.
 
@@ -43,7 +43,7 @@ This ensures that police resources are deployed efficiently, maximizing both tra
 
 ---
 
-## 💻 Technical Architecture
+##  Technical Architecture
 
 ParkSense AI features a modern, decoupled architecture designed for blazing-fast performance and seamless visualization of massive datasets.
 
@@ -62,7 +62,7 @@ The frontend is a premium, dark-mode dashboard built for police dispatchers and 
 
 ---
 
-## 📊 Dashboard Modules
+##  Dashboard Modules
 
 1. **Live Map:** The interactive geographical visualization of all violations and ML-detected hotspots. Includes temporal filters and a time-lapse player.
 2. **Analytics:** Deep dive into traffic statistics. View total violations, peak hours, and violation breakdowns. Filter data by all 54 distinct police station areas.
@@ -71,7 +71,7 @@ The frontend is a premium, dark-mode dashboard built for police dispatchers and 
 
 ---
 
-## 🚀 Running Locally
+##  Running Locally
 
 1. **Clone the repository:**
    ```bash
