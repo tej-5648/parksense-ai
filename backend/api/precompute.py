@@ -9,8 +9,12 @@ from ml.congestion_scorer import compute_cis
 from ml.temporal_forecaster import forecast_temporal
 from ml.enforcement_optimizer import optimize_enforcement
 
-CSV_PATH = r"C:\Users\Vivek\Downloads\prototype_phase_datasets\jan to may police violation_anonymized791b166.csv"
-OUT_DIR = r"C:\Users\Vivek\.gemini\antigravity\scratch\parksense-ai\frontend\public\data"
+# Base directory of the project (2 levels up from backend/api/precompute.py)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Using relative paths so it works on any computer
+CSV_PATH = os.path.join(BASE_DIR, "backend", "data", "dataset.csv") 
+OUT_DIR = os.path.join(BASE_DIR, "frontend", "public", "data")
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
