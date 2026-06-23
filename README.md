@@ -81,14 +81,14 @@ Rather than using fragile, hardcoded numeric cutoffs that create highly skewed e
 | 🔵 **Medium** | Next 38% Scores | $\approx 21$ Standard Vectors | Programmed routine monitoring checks |
 | 🟢 **Low Risk** | Bottom 20% Scores | Baseline Rest | Periodic observation intervals |
 
-📈 Enterprise Value & Core Metrics
+ Enterprise Value & Core Metrics
 ----------------------------------
 
 -   **Manpower Efficiency:** Traffic command centers no longer deploy patrols blindly. The Enforcement Optimizer mathematically balances violation density against predicted severity.
 
 -   **Operational Impact:** Deploying active patrol shifts to the AI's Top 10 prioritized sector recommendations covers up to **59% of all high-severity traffic violations** city-wide with a minimal workforce allocation footprint.
 
-🛠 Tech Stack & Architecture
+ Tech Stack & Architecture
 ----------------------------
 
 ### Backend Pipeline (Python)
