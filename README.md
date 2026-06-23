@@ -13,7 +13,7 @@
 ---
 
 ##  Executive Summary
-Urban parking congestion is historically treated as a reactive policing problem—violations are logged via tickets or cameras *after* traffic flow has already choked. **ParkSense AI** shifts the paradigm from reactive enforcement to **proactive incident prevention**. 
+Urban parking congestion is historically treated as a reactive policing problem - violations are logged via tickets or cameras *after* traffic flow has already choked. **ParkSense AI** shifts the paradigm from reactive enforcement to **proactive incident prevention**. 
 
 By processing a large scale dataset of historical citations from the Bangalore Traffic Police, ParkSense AI maps high-density geometric parking anomalies, scores their physical congestion impact via automated target engineering, and deploys predictive intelligence models to forecast gridlock risks before they manifest.
 
