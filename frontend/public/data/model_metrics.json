@@ -1,0 +1,13 @@
+{
+  "algorithm": "CatBoostClassifier",
+  "target": "is_critical (TGI >= 75)",
+  "training_mode": "100% Full Corpus",
+  "optimal_iterations_used": 220,
+  "features": [
+    "geohash7",
+    "hour_ist",
+    "day_idx",
+    "time_sin",
+    "time_cos"
+  ]
+}

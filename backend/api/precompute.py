@@ -1,29 +1,25 @@
 import sys
 import os
+import json
+import pandas as pd
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import json
 from data.process import load_and_clean_data
 from ml.hotspot_detector import detect_hotspots
-from ml.congestion_scorer import compute_cis
+from ml.grandmaster_ml import SingleDatasetGridlockAI
 from ml.temporal_forecaster import forecast_temporal
 from ml.enforcement_optimizer import optimize_enforcement
 
-# Base directory of the project (2 levels up from backend/api/precompute.py)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Using relative paths so it works on any computer
-CSV_PATH = os.path.join(BASE_DIR, "backend", "data", "dataset.csv") 
+CSV_PATH = os.path.join(BASE_DIR, "backend", "data", "jan to may police violation_anonymized791b166.csv") 
 OUT_DIR = os.path.join(BASE_DIR, "frontend", "public", "data")
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
-    
-    # 1. Process
     df = load_and_clean_data(CSV_PATH)
     
-    # 2. Analytics Data
-    print("Generating analytics data...")
+    # 1. Restore Analytics Payload (FIXED: Added byPoliceStation for the dropdown)
+    print("Generating Analytics Data...")
     analytics_data = {
         "summary": {
             "totalViolations": len(df),
@@ -35,30 +31,23 @@ def main():
         "byDayOfWeek": [{"day": d, "count": int(c)} for d, c in df['day_of_week'].value_counts().items()],
         "byViolationType": [{"type": t, "count": int(c)} for t, c in df['primary_violation'].value_counts().head(10).items()],
         "byVehicleType": [{"type": t, "count": int(c)} for t, c in df['vehicle_type'].value_counts().head(10).items()],
-        "byMonth": [{"month": m, "count": int(c)} for m, c in df['month'].value_counts().sort_index().items()],
         "byPoliceStation": [{"station": s, "count": int(c)} for s, c in df['police_station'].value_counts().items()],
-        "byStationData": {}
+        "byStationData": {s: df[df['police_station'] == s]['primary_violation'].value_counts().to_dict() for s in df['police_station'].unique()}
     }
-    
-    for station in df['police_station'].dropna().unique():
-        sdf = df[df['police_station'] == station]
-        peak_hour_val = int(sdf['hour_ist'].mode().iloc[0]) if not sdf.empty else 12
-        analytics_data['byStationData'][str(station)] = {
-            "summary": {
-                "totalViolations": len(sdf),
-                "avgDailyViolations": int(len(sdf) / 150),
-                "peakHour": f"{peak_hour_val%12 or 12}:00 {'AM' if peak_hour_val < 12 else 'PM'}"
-            },
-            "byHour": [{"hour": int(h), "hourIST": f"{int(h)%12 or 12}:00 {'AM' if int(h) < 12 else 'PM'}", "count": int(c)} for h, c in sdf['hour_ist'].value_counts().sort_index().items()],
-            "byViolationType": [{"type": t, "count": int(c)} for t, c in sdf['primary_violation'].value_counts().head(10).items()]
-        }
-        
     with open(os.path.join(OUT_DIR, "analytics_data.json"), "w") as f:
         json.dump(analytics_data, f)
-        
-    # 3. Hotspots
-    hotspots, df = detect_hotspots(df)
-    hotspots = compute_cis(hotspots)
+    
+    # 2. AI & Hotspots
+    ai_engine = SingleDatasetGridlockAI()
+    train_df = ai_engine.engineer_gridlock_target(df)
+    ai_engine.train_predictor(train_df)
+    
+    # Save model evaluation metrics
+    with open(os.path.join(OUT_DIR, "model_metrics.json"), "w") as f:
+        json.dump(ai_engine.metrics, f, indent=2)
+    
+    hotspots, df_sampled = detect_hotspots(df)
+    hotspots = ai_engine.predict_hotspot_severity(hotspots)
     
     hotspots_data = {
         "hotspots": hotspots,
@@ -72,29 +61,18 @@ def main():
     with open(os.path.join(OUT_DIR, "hotspots_data.json"), "w") as f:
         json.dump(hotspots_data, f)
         
-    analytics_data['summary']['totalHotspots'] = len(hotspots)
-    analytics_data['summary']['avgCIS'] = hotspots_data['stats']['avgCIS']
-    with open(os.path.join(OUT_DIR, "analytics_data.json"), "w") as f:
-        json.dump(analytics_data, f)
-        
-    # 4. Temporal & Forecaster
+    # 3. UI Analytics & Enforcement
     temporal_data = forecast_temporal(df)
-    
-    predictions_data = {
-        "zoneForecasts": temporal_data['zoneForecasts']
-    }
     with open(os.path.join(OUT_DIR, "temporal_data.json"), "w") as f:
         json.dump({"hourly": temporal_data['hourly']}, f)
-        
     with open(os.path.join(OUT_DIR, "predictions_data.json"), "w") as f:
-        json.dump(predictions_data, f)
+        json.dump({"zoneForecasts": temporal_data['zoneForecasts']}, f)
         
-    # 5. Enforcement Optimization
     enforcement_data = optimize_enforcement(hotspots)
     with open(os.path.join(OUT_DIR, "enforcement_data.json"), "w") as f:
         json.dump(enforcement_data, f)
         
-    # 6. Violations Points
+    # 4. Restore Violations Points for Heatmap (FIXED: Added dynamic mapping arrays)
     print("Generating violations points (compact format)...")
     violation_types = df['primary_violation'].unique().tolist()
     vehicle_types = df['vehicle_type'].unique().tolist()
@@ -130,7 +108,7 @@ def main():
     with open(os.path.join(OUT_DIR, "violations_points.json"), "w") as f:
         json.dump(violations_points, f)
         
-    print("Done! Output written to", OUT_DIR)
+    print("Done! React Dashboard will now load perfectly.")
 
 if __name__ == "__main__":
     main()

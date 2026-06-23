@@ -1,5 +1,5 @@
 def optimize_enforcement(hotspots):
-    print("Optimizing enforcement...")
+    print("Optimizing enforcement with dynamic scaling...")
     
     zones = {}
     for h in hotspots:
@@ -21,26 +21,26 @@ def optimize_enforcement(hotspots):
         zones[zone]['hotspotCount'] += 1
         zones[zone]['hotspots'].append(h)
         
+    # Find the absolute maximum violations in the city to anchor the scale
+    max_violations = max((data['predictedViolations'] for data in zones.values()), default=1)
+    
     patrol_zones = []
     for zone, data in zones.items():
         avg_cis = data['cisScoreSum'] / data['hotspotCount'] if data['hotspotCount'] > 0 else 0
-        priority_score = (data['predictedViolations'] / 50 * 0.4 + avg_cis / 100 * 0.6) * 100
+        
+        # Scale violations dynamically against the worst zone
+        v_score = (data['predictedViolations'] / max_violations) * 0.4
+        c_score = (avg_cis / 100) * 0.6
+        priority_score = (v_score + c_score) * 100
         
         peak_hours = [h['peakHour'] for h in data['hotspots']]
         avg_peak = sum(peak_hours) / len(peak_hours) if peak_hours else 12
         
-        if 5 <= avg_peak <= 12:
-            shift = 'morning'
-        elif 13 <= avg_peak <= 18:
-            shift = 'afternoon'
-        else:
-            shift = 'night'
+        if 5 <= avg_peak <= 12: shift = 'morning'
+        elif 13 <= avg_peak <= 18: shift = 'afternoon'
+        else: shift = 'night'
             
-        if data['hotspots']:
-            main_hotspot = max(data['hotspots'], key=lambda x: x['cisScore'])
-            centroid = main_hotspot['centroid']
-        else:
-            centroid = [0, 0]
+        centroid = max(data['hotspots'], key=lambda x: x['cisScore'])['centroid'] if data['hotspots'] else [0, 0]
             
         patrol_zones.append({
             'zone': zone,
@@ -54,6 +54,7 @@ def optimize_enforcement(hotspots):
             'expectedImpact': f"Covers {min(95, int(avg_cis))}% of violations"
         })
         
+    # Sort by priority score to create a true 1 to N ranking
     patrol_zones.sort(key=lambda x: x['priorityScore'], reverse=True)
     
     for i, pz in enumerate(patrol_zones):
@@ -70,23 +71,19 @@ def optimize_enforcement(hotspots):
             for pz in patrol_zones:
                 if pz['zone'] not in shifts['morning'] and pz['zone'] not in shifts['afternoon'] and pz['zone'] not in shifts['night']:
                     shifts[s].append(pz['zone'])
-                if len(shifts[s]) == 5:
-                    break
+                if len(shifts[s]) == 5: break
         if len(shifts[s]) < 5:
             for pz in patrol_zones:
                 if pz['zone'] not in shifts[s]:
                     shifts[s].append(pz['zone'])
-                if len(shifts[s]) == 5:
-                    break
+                if len(shifts[s]) == 5: break
                     
     shifts = {k: v[:5] for k, v in shifts.items()}
     
     return {
         'patrolZones': patrol_zones[:20],
         'coverageAnalysis': {
-            'top5Coverage': "42%",
-            'top10Coverage': "68%",
-            'top20Coverage': "85%"
+            'top5Coverage': "42%", 'top10Coverage': "68%", 'top20Coverage': "85%"
         },
         'shiftRecommendations': shifts
     }
