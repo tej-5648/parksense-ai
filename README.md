@@ -48,7 +48,7 @@ Instead of using rigid grid shapes like K-Means, which distort linear street top
 
 ### 2\. Custom Target Engineering: Theoretical Gridlock Index (TGI)
 
-To solve the lack of direct ground-truth traffic velocity metrics, the pipeline engineers an active proxy target---the **Theoretical Gridlock Index (TGI)**---which represents the true physical disruption to road width:
+To solve the lack of direct ground-truth traffic velocity metrics, the pipeline engineers an active proxy target-the **Theoretical Gridlock Index (TGI)**-which represents the true physical disruption to road width:
 
 $$\text{Base TGI} = \text{Violation Count} \times \text{Avg}(\text{Severity Weight}) \times \text{Avg}(\text{Vehicle Blockage Weight})$$
 
