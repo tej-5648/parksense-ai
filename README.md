@@ -181,4 +181,4 @@ Rather than using fragile, hardcoded numeric cutoffs that create highly skewed e
 
 4.  Launch your browser window and navigate directly to: `http://localhost:5173`
 
-*Developed for the National Predictive Traffic Enforcement Initiative.*
+*Developed for Bengaluru Traffic Police.*
